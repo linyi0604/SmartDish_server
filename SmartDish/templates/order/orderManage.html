@@ -1,0 +1,129 @@
+{% extends "adminBase.html" %}
+
+{% block panel %}
+    <!--订单管理-->
+<form id="form" method="get" action="/order/orderManage">
+    <div id="dishPanel" class="jumbotron clearfix myPanel" style="margin-bottom: 0px;">
+        <div class="container">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- 菜品管理标题 -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand">订单管理</a>
+                    </div>
+
+                    <!-- 下拉框和搜索框 -->
+
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <div class="navbar-form navbar-left">
+                            <span>日期:</span>
+                            <div class="form-group">
+                                <input name="start_time" value="{{ start_time }}"  type="date" class="form-control" placeholder="输入菜名">
+                            </div>
+                            <span>~</span>
+                            <div class="form-group">
+                                <input name="end_time" value="{{ end_time }}"  type="date" class="form-control" placeholder="输入菜名">
+                            </div>
+                            <div class="form-group">
+                                <span>状态</span>
+                                <select name="is_payed" class="form-control">
+                                    <option {% if is_payed == "all" %}selected{% endif %} value="all">全部</option>
+                                    <option {% if is_payed == "false" %}selected{% endif %} value="false">未付款</option>
+                                    <option {% if is_payed == "true" %}selected{% endif %} value="true">已付款</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input name="key_word" value="{{ key_word }}"  type="text" class="form-control" placeholder="请输入关键字">
+                            </div>
+                            <button type="submit" class="btn btn-default">查询</button>
+                        </div>
+                    </div>
+
+                    <!--搜索菜品结果-->
+                    {% if orderInfoList %}
+                    <table class="table table-striped">
+                        <tbody>
+                        {% for o in orderInfoList %}
+                        <tr>
+                            <td style="width: 100px;">单号:{{ o.orderNo.id }}</td>
+                            <td style="width: 150px;">{{ o.orderNo.create_time }}</td>
+                            <td>顾客:{{ o.orderNo.customer.name }} {{ o.orderNo.customer.phone }}</td>
+                            <td>数量:{{ o.orderNo.count }}</td>
+                            <td>总价:{{ o.orderNo.price}}</td>
+                            <td>状态:{% if o.orderNo.is_payed %} 已付款 {% else %} 未付款 {% endif %}</td>
+                            <td>
+                                {% if o.orderNo.is_payed %}
+                                    <a class="btn btn-primary" style="margin-top: -5px; background-color: #f7f7f7; color: black;">已完成</a>
+                                {% else %}
+                                    <a href="/order/finishOrder?oid={{ o.orderNo.id }}" class="btn btn-primary" style="margin-top: -5px;">结单</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td colspan="5">
+                                <table>
+                                    <tr>
+                                        <th style="width: 200px;">类别</th>
+                                        <th style="width: 200px;">图片</th>
+                                        <th style="width: 200px;">名称</th>
+                                        <th style="width: 200px;">数量</th>
+                                        <th style="width: 200px;">单价</th>
+                                    </tr>
+                                    {% for oi in o.orderInfo %}
+                                        <tr>
+                                        <td style="width: 200px;">{{ oi.dish.dish_type.typeName }}</td>
+                                        <td style="width: 200px;"><img src="/static/media/image/{{ oi.dish.dishImage }}" alt="" style="width: 30px; height: 30px;"></td>
+                                        <td style="width: 200px;">{{ oi.dish.dishName  }}</td>
+                                        <td style="width: 200px;">{{ oi.count }}</td>
+                                        <td style="width: 200px;">{{ oi.dish.dishPrice }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </td>
+                            <td></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+                    <!--分页-->
+                    <div class="text-center">
+                    <ul class="pagination">
+                        {% if curPaginator.has_previous %}
+                            <li><a class="p" index="{{ curPaginator.previous_page_number }}" >&laquo;</a></li>
+                        {% endif %}
+                        {% for p in pageRange %}
+                            <li>
+                                <a class="p" index="{{ p }}" {% if p == curPage %} style="background-color: #f8f8f8;" {% endif %}>{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if curPaginator.has_next %}
+                            <li><a class="p" index="{{ curPaginator.next_page_number }}" >&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                        <input id="goPage" name="page" type="hidden" value="">
+                        <script>
+                            $(".p").click(function(){
+                                $("#goPage").val($(this).attr("index"));
+                                $("#form").submit();
+                            });
+                        </script>
+                    </div>
+                    {% endif %}
+                </div><!-- /.container-fluid -->
+
+            </nav>
+        </div>
+    </div>
+</form>
+    <script>
+
+    </script>
+{% endblock panel %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}商家注册{% endblock title %}
+
+
+{% block body %}
+    <!-- 商家注册部分 -->
+<div class="container">
+    <!--注册标题-->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header navbar-brand">
+                <p>商家注册</p>
+            </div>
+        </div>
+    </nav>
+
+    <!--表单部分-->
+    <form id="form" action="/re_user/register" method="post" class="navbar-form center-block text-center" >
+        {% csrf_token %}
+        <div class="input-group">
+            <span class="input-group-addon" style="width: 100px;">用户名：</span>
+            <input id="username" name="username" type="text" class="form-control" placeholder="请输入用户名" aria-describedby="basic-addon1">
+        </div>
+        <br>
+        <div class="input-group affix">
+            <span id="username-msg" class="text-danger" style="display: none;">用户名已存在！</span>
+        </div>
+        <br>
+        <div class="input-group">
+            <span class="input-group-addon" style="width: 100px;">密&nbsp;&nbsp;&nbsp;&nbsp;码：</span>
+            <input id="password" name="password" type="password" class="form-control" placeholder="请输入密码" aria-describedby="basic-addon1">
+        </div>
+        <br>
+        <div class="input-group  affix hidden">
+            <span class="text-danger" style="display: none;"></span>
+        </div>
+        <br>
+        <div class="input-group">
+            <span class="input-group-addon" style="width: 100px;">确认密码：</span>
+            <input id="password2" type="password" class="form-control" placeholder="确认密码" aria-describedby="basic-addon1">
+        </div>
+        <br>
+        <div class="input-group  affix">
+            <span id="password-msg" class="text-danger" style="display: none;">两次密码不同！</span>
+        </div>
+        <br>
+        <br>
+        <br>
+        <div class="input-group">
+            <input type="submit" value="注册" class="form-control btn btn-primary" aria-describedby="basic-addon1">
+        </div>
+
+
+    </form>
+    <!--表单验证-->
+    <script>
+        // 输入用户名时候关闭提示
+        $(function(){
+            var flag_username = false;
+            var flag_password = false;
+            $("#username").focus(function(){
+                $("#username-msg").hide();
+            });
+            // 验证用户名
+            $("#username").blur(function(){
+                var username = $("#username").val();
+                if(username.length > 20){
+                    $("#username-msg").html("用户名需要少于20长度").show();
+                    flag_username = false;
+                }else if(username.length == 0 || /^ *$/.test(username)){
+                    $("#username-msg").html("用户名不能为空").show();
+                    flag_username = false;
+                }
+
+                // 发送ajax 验证用户名是否重复
+                $.ajax({
+                    url:"/re_user/register",
+                    method: "post",
+                    data:{
+                        "target":"check",
+                        "username":username,
+                        "csrfmiddlewaretoken": $("input[type='hidden']").val()
+                    },
+                    success:function(data){
+                        if(data.res != "OK"){
+                            $("#username-msg").html("用户名已经被占用").show();
+                            flag_username = false;
+                        }
+                    },
+                    error:function(){
+                        alert("服务器故障,请联系管理员")
+                    }
+                });
+
+
+
+                flag_username = true;
+                // $("#username-msg").show();
+
+            });
+            // 输入密码的时候关闭提示
+            $("#password").focus(function(){
+                $("#password-msg").hide();
+                flag_password = true;
+            });
+            $("#password2").focus(function(){
+                $("#password-msg").hide();
+                flag_password = true;
+            });
+            // 重复密码不同 则提示密码不同
+            $("#password").blur(function(){
+                if($("#password").val() != $("#password2").val()){
+                    $("#password-msg").show();
+                    flag_password = false;
+                }
+            });
+            $("#password2").blur(function(){
+                if($("#password").val() != $("#password2").val()){
+                    $("#password-msg").show();
+                    flag_password = false;
+                }
+            });
+            //验证提交的表单
+            $("#form").submit(function(){
+                // 两个都没问题的时候才允许提交表单
+                if(flag_password && flag_username){
+                    return true
+                }
+                alert("请正确填写用户名和密码");
+                return false;
+            });
+        })
+    </script>
+</div>
+{% endblock body %}

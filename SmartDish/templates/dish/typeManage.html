@@ -1,0 +1,117 @@
+{% extends "adminBase.html" %}
+
+{% block panel %}
+    <!--菜品分类管理-->
+    <div id="typePanel" class="jumbotron clearfix myPanel" style="margin-bottom: 0px;">
+        <div class="container">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- 菜品管理标题 -->
+                    <h3>分类管理</h3>
+                    <ul id="typeList" class="list-group">
+                        {% for t in typeList %}
+                        <li class="list-group-item">
+                            <input type="text" class="btn" style="text-align: left; border: 1px solid skyblue;" value="{{ t.typeName }}">
+                            <button tid="{{ t.id }}" class="btn btn-success changeName">改名</button>
+                            <button tid="{{ t.id }}" class="btn btn-danger delType" style="float: right; ">删除</button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                 <script>
+                    $("#typeList").delegate(".changeName","click",function () {
+                        var typeID = $(this).attr("tid");
+                        var value = $(this).siblings().val();
+                        $.ajax({
+                            method:"get",
+                            url:"/dish/changeTypeName/",
+                            data:{
+                               "typeID":typeID,
+                               "value":value
+                            },
+                            success:function(data){
+                                if(data.info != "OK"){
+                                    alert(data.info);
+                                }else{
+                                    window.location.reload();
+                                }
+                            },
+                            error:function(){
+                                alert("发生未知错误!")
+                            }
+
+                        });
+                    });
+                </script>
+
+                    <div class="navbar-form text-center">
+                        <button id="addType" class="btn btn-default">增加</button>
+                        <script>
+                            $("#addType").click(function(){ // 点击添加分类
+                                $("#newNode").remove();
+                                $("#typeList").append('<li id="newNode" class="list-group-item"><input type="text"><button id="addNewNode" class="btn btn-success" style="float: right; margin-top: -8px;">确定</button></li>');
+                            });
+                            $("#typeList").delegate("#addNewNode","click",function(){
+                                var value = $("#newNode input").val();
+                                if(/^ *$/.test(value)){ // 分类名称不能为空或者空格
+                                    alert("请输入正确的分类名称");
+                                    window.location.reload();
+                                    return false;
+                                }
+                                // 发送ajax添加分类
+                                $.ajax({
+                                    method:"get",
+                                    url:"/dish/addType",
+                                    data:{"typename":value},
+                                    success:function(data){
+                                        if(data.info !="OK"){
+                                            alert(data.info);
+                                        }
+                                        window.location.reload();
+                                    },
+                                    error:function(){
+                                        alert("发生错误,请联系技术人员!")
+                                    }
+                                });
+
+
+                            });
+                            $("#typeList").delegate(".delType","click",function(){ // 删除分类
+                                var tid = $(this).attr("tid");
+                                $.ajax({
+                                    method:"get",
+                                    url:"/dish/deleteType",
+                                    data:{"typeID":tid},
+                                    success:function(data){
+                                        if(data.info != "OK"){
+                                            alert(data.info);
+                                        }
+                                        window.location.reload();
+                                    },
+                                    error:function(){
+                                        alert("发生错误!")
+                                    }
+                                })
+                            })
+                        </script>
+                        <button id="typeGoBack" class="btn btn-default">返回</button>
+                        <script>
+                            // 点击返回
+                            $("#typeGoBack").click(function(){  // 修改分类返回
+                                window.location.href = "/dish/dishManage/";
+                            });
+                        </script>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+{% endblock panel %}
+
+{% block bottem_file %}
+<script>
+    // 页面起始效果
+    $(function () {
+        $("#typePanel").css({"opacity":"0"}).animate({"opacity":"1"});
+    });
+</script>
+{% endblock bottem_file%}

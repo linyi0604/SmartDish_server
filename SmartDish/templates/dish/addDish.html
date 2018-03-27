@@ -1,0 +1,104 @@
+{% extends "adminBase.html" %}
+
+
+{% block panel %}
+    <!--添加菜品-->
+    <form id="form" action="/dish/addDish" method="post" enctype="multipart/form-data">
+
+    {% csrf_token %}
+    <div class="jumbotron clearfix myPanel" style="margin-bottom: 0px;">
+        <div class="container">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <h3>添加菜品</h3>
+                    <hr>
+                    <div class="text-center">
+                    <div class="form-group " style="display: inline-block; width: 600px; clear: both; margin: 0 auto;">
+                        <div style="float: left;">
+                        <span class="">名称:</span>
+                        <input name="dishName" class="btn btn-default" type="text">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="">类别:</span>
+                        <select id="dishType" name="dishType" class="btn btn-default">
+                            {% for t in typeList %}
+                            <option value="{{ t.id }}">{{ t.typeName }}</option>
+                            {% endfor %}
+                            <option value="add">添加分类...</option>
+                        </select>
+                            <script>
+                                $("#dishType").change(function(){
+                                   if($(this).val()=="add"){
+                                       location.href = "/dish/typeManage/";
+                                   }
+                                });
+                            </script>
+                        </div>
+                        <br>
+                        <div style="float: left;">
+                        <span class="">价格:</span>
+                        <input name="dishPrice" class="btn btn-default" type="text">
+                        <span>元</span>
+                        </div>
+                        <br>
+                        <div style="float: left; width: 400px; height: 120px; margin-top: 10px">
+                        <span style="float: left; margin-top: 40px">图片:</span>
+                        <img id="uploadhead" src="" alt="" style="width: 100px; height: 100px; display: inline-block;">
+                        <input name="dishImage" id="imgUpload" type="file" class="btn btn-group" style="display: inline; width: 200px;">
+                        <script>
+                            $("#imgUpload").change(function(e) {
+                                for (var i = 0; i < e.target.files.length; i++) {
+                                    var file = e.target.files.item(i);
+                                    var freader = new FileReader();
+                                    freader.readAsDataURL(file);
+                                    freader.onload = function(e) {
+                                        var src = e.target.result;
+                                        $("#uploadhead").attr("src",src);
+                                    }
+                                }
+                            });
+                        </script>
+                        </div>
+                        <br>
+                        <div style="float: left; clear:both">
+                            <span style="float: left;">菜品特色(多选):</span>
+                            <br>
+                            {% for k,v in featureTable.items %}
+                                <hr>
+                                <span style="float: left; margin-top: 8px;">{{ k.typeName }}(多选):</span>
+                                {% for feature in v %}
+                                <label class="btn"><input name="dishFeature" type="checkbox" value="{{ feature.id }}" />{{ feature.featureName }}</label> &nbsp;
+                                {% endfor %}
+                            <br>
+                            {% endfor %}
+                            <hr>
+                        </div>
+                        <div style="float: left;">
+                        <span style="float: left;">介绍：</span>
+                        <textarea name="dishDetail" class="form-control myinput"  aria-describedby="basic-addon1"
+                                  style="width: 400px; height: 200px; resize: none; text-indent: 16px;"
+                        ></textarea>
+                        </div>
+
+                    </div>
+                    </div>
+                    <br>
+                    <hr>
+                    <div class="navbar-form text-center">
+                        <button class="btn btn-default">确认</button>
+                        <a id="typeGoBack" href="/dish/dishManage" class="btn btn-default">返回</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    </form>
+       <script>
+            $("#form").submit(function(){
+                var dishType = $("#dishType").val();
+                if(dishType == null){
+                    alert("请正确选择分类,或者添加分类!");
+                    return false;
+                }
+            });
+        </script>
+{% endblock panel %}

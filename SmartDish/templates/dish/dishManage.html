@@ -1,0 +1,110 @@
+{% extends "adminBase.html" %}
+
+{% block panel %}
+    <!--菜品管理-->
+    <form id="form" method="get" action="/dish/dishManage/">
+    <div id="dishPanel" class="jumbotron clearfix myPanel" style="margin-bottom: 0px;">
+        <div class="container">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- 菜品管理标题 -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand">菜品管理</a>
+                    </div>
+
+                    <!-- 下拉框和搜索框 -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <div class="navbar-form navbar-left">
+                            <ul class="nav navbar-nav">
+                                <div class="btn-group">
+                                    <div class="form-group">
+                                        <span class="form-group">分类:</span>
+                                        <select name="dishTypeID" class="form-control">
+                                            <option value="all" >全部</option>
+                                            {% for t in typeList %}
+                                            <option value="{{ t.id }}"
+                                                {% if dishTypeID == t.id %}selected{% endif %}
+                                                >{{ t.typeName }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </ul>
+                            <div class="form-group">
+                                <input name="dishName" value="{{ dishName }}" type="text" class="form-control" placeholder="输入菜名">
+                            </div>
+                            <button type="submit" class="btn btn-default">查询</button>
+                            <a class="btn btn-primary" href="/dish/typeManage/">分类管理</a>
+                            <a class="btn btn-primary" href="/dish/addDish/">添加新菜</a>
+                        </div>
+                    </div><!-- /.navbar-collapse -->
+                    <!--搜索菜品结果-->
+                    {% if dishList %}
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>类别</th>
+                            <th>图片</th>
+                            <th>名称</th>
+                            <th>价格</th>
+                            <th>销量</th>
+                            <th>编辑</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for dish in dishList %}
+                        <tr>
+                            <td>{{ dish.dish_type.typeName }}</td>
+                            <td>
+                                <img src="/static/media/image/{{ dish.dishImage }}" alt=""
+                                style="width: 30px; height: 30px;">
+                            </td>
+                            <td>{{ dish.dishName }}</td>
+                            <td>{{ dish.dishPrice }}</td>
+                            <td>{{ dish.dishSellCount }}</td>
+                            <td><a href="/dish/editDish?did={{ dish.id }}" class="btn btn-primary" style="margin-top: -5px;">编辑</a></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+                    <!--分页-->
+                    <div class="text-center">
+                    <ul class="pagination">
+                        {% if curPaginator.has_previous %}
+                            <li><a class="p" index="{{ curPaginator.previous_page_number }}" >&laquo;</a></li>
+                        {% endif %}
+                        {% for p in pageRange %}
+                            <li>
+                                <a class="p" index="{{ p }}" {% if p == curPage %} style="background-color: #f8f8f8;" {% endif %}>{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if curPaginator.has_next %}
+                            <li><a class="p" index="{{ curPaginator.next_page_number }}" >&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                        <input id="goPage" name="page" type="hidden" value="">
+                        <script>
+                            $(".p").click(function(){
+                                $("#goPage").val($(this).attr("index"));
+                                $("#form").submit();
+                            });
+                        </script>
+                    </div>
+                    {% endif %}
+                </div><!-- /.container-fluid -->
+
+            </nav>
+        </div>
+    </div>
+    </form>
+    <script>
+
+    </script>
+{% endblock panel %}

@@ -1,0 +1,145 @@
+{% extends "adminBase.html" %}
+
+{% block panel %}
+    <!--我的餐厅-->
+    <div id="myInfoPanel" class="jumbotron clearfix myPanel" style="margin-bottom: 0px; display: none;">
+        <div class="container">
+            <h2>我的餐厅</h2>
+            <!--表单部分-->
+            <form id="form" action=/re_user/myRestaurant" method="post" enctype="multipart/form-data">
+            <div class="navbar-form center-block text-center" >
+                <div class="input-group" style="width: 300px;">
+                    <span class="input-group-addon" style="width: 100px;">餐厅名称：</span>
+                    <input id="name" name="name" type="text" value="{{ name }}" class="form-control myinput" aria-describedby="basic-addon1">
+                </div>
+                <br>
+                <div class="input-group" style="width: 300px;">
+                    <span class="input-group-addon " style="width: 100px;">电话号码：</span>
+                    <input id="phone" name="phone" type="tel" class="form-control myinput" value="{{ phone }}" aria-describedby="basic-addon1">
+                </div>
+                <br>
+                <div class="input-group" style="width: 300px;">
+                    <span class="input-group-addon"  style="width: 100px;">图&nbsp;&nbsp;&nbsp;&nbsp;片：</span>
+                    <div class="form-control myinput"
+                        style="width: 200px; height: 140px; resize: none; text-indent: 16px;">
+                        <img id="uploadhead" src="/static/media/image/{{ image }}" alt="" style="width: 100px; height: 100px; display: inline-block;">
+                        <input name="resImage" id="imgUpload" type="file" class="btn btn-group" style="display: inline; width: 200px;">
+                        <script>
+                            $("#imgUpload").change(function(e) {
+                                for (var i = 0; i < e.target.files.length; i++) {
+                                    var file = e.target.files.item(i);
+                                    var freader = new FileReader();
+                                    freader.readAsDataURL(file);
+                                    freader.onload = function(e) {
+                                        var src = e.target.result;
+                                        $("#uploadhead").attr("src",src);
+                                    }
+                                }
+                            });
+                        </script>
+                    </div>
+                </div>
+                <br>
+                <div class="input-group" style="width: 300px;">
+                    <span class="input-group-addon"  style="width: 100px;">地&nbsp;&nbsp;&nbsp;&nbsp;址：</span>
+                    <textarea id="address" name="address" class="form-control myinput" aria-describedby="basic-addon1"
+                        style="width: 200px; height: 100px; resize: none; text-indent: 16px;"
+                    >{{ address }}</textarea>
+                </div>
+                <br>
+                <div class="input-group" style="width: 300px;">
+                    <span class="input-group-addon" style="width: 100px;">介&nbsp;&nbsp;&nbsp;&nbsp;绍：</span>
+                    <textarea name="detail" id="detail" class="form-control myinput"  aria-describedby="basic-addon1"
+                              style="width: 200px; height: 300px; resize: none; text-indent: 16px;"
+                    >{{ detail }}</textarea>
+                </div>
+
+                <br><br><br><br>
+                <div class="input-group">
+                    <input id="btn" type="submit" value="修改" class="form-control btn btn-primary" aria-describedby="basic-addon1">
+                </div>
+                <div class="input-group">
+                    <input id="back" type="submit" style="display: none;" value="返回" class="form-control btn btn-primary" aria-describedby="basic-addon1">
+                </div>
+            </div>
+            {% csrf_token %}
+            </form>
+            <script>
+                $(function(){
+                    $("#imgUpload").hide();
+
+                    $(".myinput").attr("readonly","readonly");
+                    var state = "view";
+                    $("#btn").click(function(){
+                        if(state == "view"){    // 点击修改 打开修改权限
+                            $("#imgUpload").show();
+                            $(".myinput").removeAttr("readonly");
+                            $("#btn").val("保存");
+                            state = "change";
+                            $("#back").show();
+                            return false;
+                        }else{  // 修改完毕点击保存
+                            $("#imgUpload").hide();
+                            var name = $("#name").val();
+                            var phone = $("#phone").val();
+                            var address = $("#address").val();
+                            var detail = $("#detail").val();
+                            var resImage = $("#imgUpload").val();
+                            if(name.length >100){
+                                alert("名称太长了");
+                                return false;
+                            }
+                            if(! /^[0-9]+$/.test(phone)){
+                                alert("请正确填写电话号码");
+                                return false;
+                            }
+
+
+
+                            // 发送ajax保存修改信息
+{#                            $.ajax({#}
+{#                                method:"post",#}
+{#                                url:"/re_user/myRestaurant",#}
+{#                                data:{#}
+{#                                    "name":name,#}
+{#                                    "phone":phone,#}
+{#                                    "address":address,#}
+{#                                    "detail":detail,#}
+{#                                    "resImage":resImage,#}
+{#                                    "csrfmiddlewaretoken": $("input[type='hidden']").val()#}
+{#                                },#}
+{#                                success:function(data){#}
+{#                                    if(data.msg != "OK"){#}
+{#                                        alert("修改发生错误!");#}
+{#                                        return false;#}
+{#                                    }#}
+{#                                },#}
+{#                                error:function(){#}
+{#                                    alert("服务器错误请联系管理员!");#}
+{#                                }#}
+{#                            });#}
+{##}
+{#                            $(".myinput").attr("readonly","readonly");#}
+{#                            $("#btn").val("修改");#}
+{#                            $("#back").hide();#}
+{#                            state = "view";#}
+
+
+                            $("#form").submit();
+
+
+                        }
+                    });
+                    $("#back").click(function(){
+                        $("#imgUpload").hide();
+                        $(".myinput").attr("readonly","readonly");
+                        $("#btn").val("修改");
+                            $("#back").hide();
+                            state = "view";
+                        return false;
+                    })
+                })
+            </script>
+        </div>
+    </div>
+{% endblock panel %}

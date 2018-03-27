@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}美食森林-后台管理{% endblock title %}
+
+{% block top_files %}
+    <style>
+        a{cursor: pointer;}
+    </style>
+{% endblock top_files %}
+
+
+{% block body %}
+    <div class="container">
+    <!--后台管理-->
+    <nav class="navbar navbar-default" style="position: relative;">
+        <span id="new_order_tip" style="
+            display: none;
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background-color: orange;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            color: white;
+            border-radius: 25px;
+            padding: 5px;">有新订单</span>
+        <div class="container-fluid">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#main-menu">
+                <span class="sr-only">切换导航</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <div class="navbar-header navbar-brand">
+                <p id="welcome" style="cursor: pointer;">
+                    <a href="/re_user/adminPage" style="color: black; text-decoration: none">后台管理</a>
+                </p>
+            </div>
+            <div id="main-menu" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a></a></li>
+                    <li><a href="/re_user/changePassword" id="changePassord">修改密码</a></li>
+
+                    <li><a href="/re_user/myRestaurant" id="myRestaurant">我的餐厅</a></li>
+
+                    <li><a href="/dish/dishManage" id="dishManage">菜品管理</a></li>
+
+                    <li>
+                        <a href="/order/orderManage" id="orderManage">订单管理</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <hr>
+{% block panel %}
+
+{% endblock panel %}
+    <hr>
+</div>
+
+{% block bottem_file %}
+    <script>
+        // 点击后台管理
+        $(function(){
+            $(".myPanel").show().css({"opacity":"0"}).animate({"opacity":"1"});
+
+
+            var pop_con;
+            var flag = false;   // 标记当前是否有新的未检查的订单
+
+            setInterval(function(){
+                if(flag == true){
+                    return;
+                }else{
+                    ajax_check_new_order();
+                }
+            },5000);
+
+            // 发送ajax轮询是否有新的订单 如果有就闪烁提示
+            function ajax_check_new_order(){
+                $.ajax({
+                method:"get",
+                url:"/order/checkNewOrder",
+                async:true,
+                data:{
+                   "username":"{{ request.session.username }}"
+                },
+                success:function(data){
+                    if(data.msg == true){   // 有未检查的订单那
+                        if(flag == true){
+                            return;
+                        }else{
+                            flag = true;
+                            pop_con = start_pop_con();
+                        }
+                    }else{
+                        if(flag == false){
+                            return;
+                        }else{
+                            flag = false;   // 没有未检查的订单那
+                            clearInterval(pop_con);
+                        }
+                    }
+                }
+            });
+            }
+
+
+
+
+        });
+
+
+        // 新订单闪动提示
+        var new_order_tip = $("#new_order_tip");
+        var start_pop_con = function(){
+            st = setInterval(function(){
+                popCon(new_order_tip)
+            },1500);
+            return st;
+        };
+
+        function popCon(new_order_tip){
+            new_order_tip.show();
+            setTimeout(function(){
+                new_order_tip.hide();
+            },1000);
+        }
+
+
+
+    </script>
+{% endblock bottem_file %}
+{% endblock body %}
