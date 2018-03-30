@@ -1,6 +1,7 @@
 import requests
 from lxml import etree
 import json
+import os
 
 class DishSpider(object):
 
@@ -24,16 +25,22 @@ class DishSpider(object):
         for url in url_list:
             html_code = self.get_html_code(url)
             elements = etree.HTML(html_code)
-            con = {
-                "name":elements.xpath('//a[@id="tongji_title"]/text()')[0],
-                "features":elements.xpath('//dl[contains(@class,"yj_tags")]//text()'),
-                "labels":[ i.strip("#") for i in elements.xpath('//a[@class="curzt"]/text()')],
-                "method":elements.xpath('//a[@id="tongji_gy"]/text()')[0],
-                "taste":elements.xpath('//a[@id="tongji_kw"]/text()')[0],
-                "detail":elements.xpath('//div[@class="materials"]/p/text()')[0],
-                "image":elements.xpath('//div[@class="cp_headerimg_w"]/img/@src')[0],
-            }
-            dish_list.append(con)
+            try:
+                con = {
+                    "name":elements.xpath('//a[@id="tongji_title"]/text()')[0] or "",
+                    "features":elements.xpath('//dl[contains(@class,"yj_tags")]//text()') or "",
+                    "labels":[ i.strip("#") for i in elements.xpath('//a[@class="curzt"]/text()')] or "",
+                    "method":elements.xpath('//a[@id="tongji_gy"]/text()')[0] or "",
+                    "taste":elements.xpath('//a[@id="tongji_kw"]/text()')[0] or "",
+                    "detail":elements.xpath('//div[@class="materials"]/p/text()')[0] or "",
+                    "image":elements.xpath('//div[@class="cp_headerimg_w"]/img/@src')[0] or "",
+                }
+                dish_list.append(con)
+            except Exception as e:
+                with open("error.log","a") as f:
+                    f.write(str(e)+":"+url+"\n")
+                continue
+
             self.length += 1
         return dish_list
 
@@ -68,6 +75,10 @@ class DishSpider(object):
 
 
 if __name__ == '__main__':
+    if os.path.exists("./spiderData/dishes.json"):
+        os.remove("./spiderData/dishes.json")
+    if os.path.exists("./error.log"):
+        os.remove("./error.log")
     target_list = [
         "http://www.meishij.net/hongpei/",
         "http://www.meishij.net/chufang/diy/guowaicaipu1/",
@@ -75,8 +86,8 @@ if __name__ == '__main__':
         "http://www.meishij.net/china-food/caixi/",
         "http://www.meishij.net/chufang/diy/",
     ]
-    spider = DishSpider(target_list[0])
-    spider.run()
-    # for url in target_list:
-    #     spider = DishSpider(url)
-    #     spider.run()
+    # spider = DishSpider(target_list[0])
+    # spider.run()
+    for url in target_list:
+        spider = DishSpider(url)
+        spider.run()
