@@ -9,18 +9,34 @@ from utils.spider.register_dish import run
 
 
 def run():
+    i = 1
+    res_no = 0
+
+    re_user = ReUserInfo.objects.add_one_object(username="res%s" % res_no, password=str(res_no))
+    re_user.save()
+    default_type = DishType.objects.add_one_object(userID=re_user.id, typename="默认")
+    default_type.save()
     feature_type_id = 10
-    res_id = 9
-    re_user = ReUserInfo.objects.get(id=res_id)
-    dish_type = DishType.objects.filter(re_user=re_user)
-    default_type = dish_type[0]
+
+    image_url = ""
 
     with open("./utils/spider/spiderData/dish_list_with_image.json","r") as f:
         line = f.readline()
         while line:
+            if i % 100 == 0:
+                res_no+=1
+                re_user = ReUserInfo.objects.add_one_object(username="res%s" % res_no, password=str(res_no))
+                re_user.name = "测试餐厅%s"%res_no
+                re_user.phone = res_no
+                re_user.image = image_url
+                re_user.save()
+                default_type = DishType.objects.add_one_object(userID=re_user.id, typename="默认")
+                default_type.save()
+
             try:
                 json_obj = line.rstrip("\n")
                 con = json.loads(json_obj)
+                image_url = con["image_name"]
                 features = []
                 if con["labels"]:
                     features += con["labels"]
@@ -48,9 +64,11 @@ def run():
                             dishFeature=",".join(feature_id_list)
                         )
                 dish.save()
+
             except Exception as e:
                 print(e)
 
+            i += 1
             line = f.readline()
 
 

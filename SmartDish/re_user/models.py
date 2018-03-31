@@ -57,7 +57,7 @@ class ReUserInfo(BaseModel):
     username = models.CharField(unique=True,max_length=50,verbose_name="商家用户名")
     password = models.CharField(max_length=40, verbose_name='密码')
     name = models.CharField(max_length=100,verbose_name="餐厅名称")
-    image = models.CharField(max_length=50,default="", verbose_name="图片路径")
+    image = models.CharField(max_length=100,default="", verbose_name="图片路径")
     address = models.CharField(max_length=100,verbose_name="餐厅地址")
     phone = models.CharField(max_length=50,verbose_name="餐厅电话")
     detail = models.CharField(max_length=1000,verbose_name="餐厅介绍")

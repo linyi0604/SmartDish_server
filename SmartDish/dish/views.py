@@ -24,7 +24,7 @@ def dishManage(request):
         dishList = DishInfo.objects.get_dish_by_condition(userID=userID,dishTypeID=dishTypeID,dishName=dishName)
 
         # 分页部分
-        paginator = Paginator(dishList, 5) # 分页对象 每页显示5条
+        paginator = Paginator(dishList, 10) # 分页对象 每页显示10条
         # 制作最多包含5页的页码列表
         try:
             nextPage = int(request.GET.get("page", "1")) # 当前要去的页码
@@ -38,8 +38,6 @@ def dishManage(request):
         end = pageCount if nextPage+2 >= pageCount else nextPage + 2
 
         pageRange = range(start,end+1)
-
-
 
         context = {
             "typeList": typeList,
