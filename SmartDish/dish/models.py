@@ -168,11 +168,11 @@ class DishInfoManager(models.Manager):
 class DishInfo(BaseModel):
     '''菜品信息'''
     dish_type = models.ForeignKey("DishType",verbose_name="菜品分类")
-    dishName = models.CharField(max_length=40, verbose_name="菜品名称")
+    dishName = models.CharField(max_length=100, verbose_name="菜品名称")
     dishPrice = models.FloatField(default=0.00,verbose_name="菜品价格")
-    dishImage = models.CharField(max_length=50,verbose_name="图片路径")
-    dishFeature = models.CharField(max_length=100,default="", verbose_name="特点id列表")
-    dishDetail = models.CharField(max_length=500,verbose_name="菜品介绍")
+    dishImage = models.CharField(max_length=100,verbose_name="图片路径")
+    dishFeature = models.CharField(max_length=500,default="", verbose_name="特点id列表")
+    dishDetail = models.CharField(max_length=5000,verbose_name="菜品介绍")
     dishSellCount = models.IntegerField(default=0,verbose_name="销量")
     dishGrade = models.FloatField(default=0.0,verbose_name="评分")
 

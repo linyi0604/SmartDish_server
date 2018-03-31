@@ -3,7 +3,7 @@ import os
 
 def get_dish_list():
     dish_list = []
-    with open("./spiderData/dishes.json","r") as f:
+    with open("./spiderData/dish_list_with_image.json","r") as f:
         line = f.readline()
         while line:
             line = line.rstrip("\n")
