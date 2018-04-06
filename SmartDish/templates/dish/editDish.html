@@ -26,7 +26,15 @@
                                 <option value="{{ t.id }}">{{ t.typeName }}</option>
                                 {% endif %}
                             {% endfor %}
+                            <option value="add">添加分类...</option>
                         </select>
+                        <script>
+                            $("#dishType").change(function(){
+                               if($(this).val()=="add"){
+                                   location.href = "/dish/typeManage/";
+                               }
+                            });
+                        </script>
                         </div>
                         <br>
                         <div style="float: left;">

@@ -5,7 +5,7 @@ urlpatterns = [
     url(r'^getDishPage$', views.getDishPage), # 获取菜品页面所有信息
     url(r'^getDishList$', views.getDishList), # 获取所有菜品列表
 
-
+    url(r'^addStep$', views.addStep), # 添加用户浏览一个商品的轨迹
     url(r'^getOrderInfo$', views.getOrderInfo), # 获取某条订单详情信息
     url(r'^getOrder$', views.getOrder), # 获取订单清单
     url(r'^addOrder$', views.addOrder), # 购物车结算到订单

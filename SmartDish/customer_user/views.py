@@ -4,7 +4,7 @@ from re_user.models import ReUserInfo
 from utils.common import BASE_IMAGE_URL, TIME_DELAY
 from utils.decoratiors import phone_required
 from utils.get_hash import get_hash
-from .models import CustomerUserInfo, Cart, Favorite
+from .models import CustomerUserInfo, Cart, Favorite, CustomerRecord
 from order.models import OrderInfo, OrderNo
 from django.db.models import Q
 import time
@@ -12,10 +12,29 @@ import math
 
 def getDishPage(request):
     '''手机端菜品主页所有数据'''
-    channelList = DishFeature.objects.all()[0:11]
-    dishList = DishInfo.objects.all()[0:20]
+    username = request.GET.get("username")
 
-    t = math.floor(time.time()*1000)
+    channel_info = DishFeature.objects.all()[0:11]
+    dishList = DishInfo.objects.all().order_by("-dishSellCount")[0:10]
+    recommendList = CustomerRecord.objects.get_recommend_list(username)
+
+    try:
+        recommend_info = recommendList[0:12]
+        banner_info = recommendList[12:20]
+        act_info = recommendList[20:30]
+        secKill_info = recommendList[30:35]
+        hot_info = recommendList[35:41]
+
+
+    except Exception as e:
+        print(e)
+        banner_info = dishList
+        recommend_info = dishList
+        act_info = dishList
+        secKill_info = dishList
+        hot_info = dishList
+
+    t = math.floor(time.time() * 1000)
     context = {
         # banner 广告横幅
         "banner_info": [
@@ -29,7 +48,7 @@ def getDishPage(request):
                     "detail": i.dishDetail,
                     "features": DishFeature.objects.get_name_str_list_from_id_str_list(i.dishFeature),
                     "id": i.id,
-                } for i in dishList
+                } for i in banner_info
             ],
         # 入口按钮信息
         "channel_info":[
@@ -37,7 +56,7 @@ def getDishPage(request):
                 "image_url":"/static/media/image/customer/channel/00"+str(i.id-1)+".png",
                 "name":i.featureName,
                 "id":i.id,
-            } for i in channelList
+            } for i in channel_info
         ],
         # 活动信息
         "act_info":[
@@ -51,7 +70,7 @@ def getDishPage(request):
                     "detail": i.dishDetail,
                     "features": DishFeature.objects.get_name_str_list_from_id_str_list(i.dishFeature),
                     "id": i.id,
-                } for i in dishList
+                } for i in act_info
             ],
         # secKill 秒杀部分数据
         "secKill_info":{
@@ -70,7 +89,7 @@ def getDishPage(request):
                     "detail": i.dishDetail,
                     "features": DishFeature.objects.get_name_str_list_from_id_str_list(i.dishFeature),
                     "id": i.id,
-                } for i in dishList
+                } for i in secKill_info
             ]
         },
 
@@ -85,7 +104,7 @@ def getDishPage(request):
                 "detail": i.dishDetail,
                 "features": DishFeature.objects.get_name_str_list_from_id_str_list(i.dishFeature),
                 "id": i.id,
-            } for i in dishList
+            } for i in recommend_info
         ],
         # hot 热卖信息
         "hot_info": [
@@ -98,12 +117,45 @@ def getDishPage(request):
                 "detail": i.dishDetail,
                 "features": DishFeature.objects.get_name_str_list_from_id_str_list(i.dishFeature),
                 "id": i.id,
-            } for i in dishList
+            } for i in hot_info
         ],
 
     }
     return JsonResponse(context)
 
+# /customer_user/addStep
+# 添加用户浏览一个商品的轨迹
+def addStep(request):
+    dish_id = request.GET.get("dish_id")
+    username = request.GET.get("username")
+    try:
+        CustomerRecord.objects.add_one_step(dish_id,username)
+    except Exception as e:
+        print(e)
+    try:
+        recommendList = CustomerRecord.objects.get_recommend_list_from_dish_id(dish_id)
+        recommend_info = recommendList[0:9]
+    except Exception as e:
+        print(e)
+        dishList = DishInfo.objects.all().order_by("-dishSellCount")[0:9]
+        recommend_info = dishList
+
+    context = {
+        # recommend 推荐数据
+        "recommend_info": [
+            {
+                "price": i.dishPrice,
+                "image_url": BASE_IMAGE_URL + i.dishImage,
+                "name": i.dishName,
+                "restaurant": i.dish_type.re_user.name,
+                "restaurant_id": i.dish_type.re_user.id,
+                "detail": i.dishDetail,
+                "features": DishFeature.objects.get_name_str_list_from_id_str_list(i.dishFeature),
+                "id": i.id,
+            } for i in recommend_info
+        ],
+    }
+    return JsonResponse(context)
 
 def getDishList(request):
     '''获取所有菜品列表'''
@@ -126,9 +178,6 @@ def getDishList(request):
             "dishList":list,
         }
     return JsonResponse(context)
-
-
-
 
 # /customer_user/getOrderInfo
 # 获取某条订单详情信息
@@ -160,7 +209,6 @@ def getOrderInfo(request):
                         "count":order_info.count,
                     } for order_info in order_info_list],
                 }
-        print(context)
         return JsonResponse(context)
     except Exception as e:
         print(e)
@@ -304,7 +352,6 @@ def searchRes(request):
 def searchDish(request):
     key_word = request.GET.get("key_word")
     sort = request.GET.get("sort")
-    print(key_word,sort)
     result_list = DishInfo.objects.filter(Q(dishName__contains=key_word)
                                           |Q(dishDetail__contains=key_word)).order_by(sort)
 
@@ -340,7 +387,6 @@ def getFavorite(request):
     username = request.GET.get("username")
     try:
         favorite_list = Favorite.objects.filter(customer__username=username)
-        print(len(favorite_list))
         context = {
             "list":[{
                 "id":obj.dish.id,
@@ -492,12 +538,14 @@ def addCart(request):
 def login(request):
     username = request.GET.get("username")
     password = request.GET.get("password")
+    old_username = request.GET.get("old_username")
     try:
         # 查询数据库看是否有重复
         user = CustomerUserInfo.objects.get_one_object_by_username(username)
         if not user or user.password != get_hash(password):
             return HttpResponse("notOK")
         else:
+            CustomerRecord.objects.login(old_username,user)
             return JsonResponse({
                 "username":user.username,
                 "name":user.name,
