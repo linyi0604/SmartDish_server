@@ -98,10 +98,6 @@ class CustomerRecordAdmin(models.Manager):
         random.shuffle(k)
         return k
 
-
-
-
-
 class CustomerRecord(BaseModel):
     '''用户浏览菜品轨迹'''
     isLogin = models.BooleanField(default=False,verbose_name="是否登陆用户")

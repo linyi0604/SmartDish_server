@@ -9,6 +9,4 @@ urlpatterns = [
     url(r'^changeTypeName', views.changeTypeName),  # 用户修改菜品分类名称
     url(r'^addDish', views.addDish),  # 用户添加菜品
     url(r'^editDish', views.editDish),  # 用户编辑菜品
-
-
 ]
