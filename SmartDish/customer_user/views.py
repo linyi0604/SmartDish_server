@@ -568,12 +568,12 @@ def register(request):
         # 查询数据库看是否有重复
         user = CustomerUserInfo.objects.get_one_object_by_username(username)
         if user:
-            return HttpResponse("notOK")
+            return HttpResponse("密码错误")
         else:
             CustomerUserInfo.objects.add_one_object(username,password)
             return HttpResponse("OK")
     except Exception as e:
         print(e)
-        return HttpResponse(str(e))
+        return HttpResponse("系统异常")
 
 
