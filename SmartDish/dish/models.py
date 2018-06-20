@@ -19,8 +19,10 @@ class DishFeatureType(BaseModel):
 
 class DishFeatureManager(models.Manager):
     def get_feature_table(self):
-        featureTypeList = DishFeatureType.objects.all()
-        featureTable = { t:self.filter(featureType=t) for t in featureTypeList }
+        # featureTypeList = DishFeatureType.objects.all()
+
+        featureTypeList = DishFeatureType.objects.exclude(typeName="其他")
+        featureTable = { t:self.filter(featureType=t) for t in featureTypeList}
         return featureTable
 
     def get_name_str_list_from_id_str_list(self,id_str_list):
