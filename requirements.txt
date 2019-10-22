@@ -5,7 +5,7 @@ get==0.0.39
 idna==2.6
 lxml==4.2.1
 olefile==0.44
-Pillow==4.3.0
+Pillow==6.2.0
 post==0.0.26
 public==0.0.65
 PyMySQL==0.7.11
